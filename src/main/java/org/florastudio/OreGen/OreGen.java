@@ -16,9 +16,9 @@ public final class OreGen extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         long startTime = System.currentTimeMillis();
-        getServer().getPluginManager().registerEvents(new OreCreateEvent(), this);
-        saveDefaultConfig();
 
+        saveDefaultConfig();
+        getServer().getPluginManager().registerEvents(new OreCreateEvent(), this);
         Plugin itemAdder = Bukkit.getPluginManager().getPlugin("ItemsAdder");
         if (itemAdder == null || !itemAdder.isEnabled()) {
             getLogger().warning("ItemsAdder 플러그인과 연결되지 않았습니다.");
