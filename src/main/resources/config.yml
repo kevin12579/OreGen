@@ -19,9 +19,9 @@ OreGens: #총합 100
       DEEPSLATE_DIAMOND_ORE: 2.00
       EMERALD_ORE: 1.00
       DEEPSLATE_EMERALD_ORE: 1.00
-      ANCIENT_DEBRIS: 1.00
-    ITEMADDER:
-      TEST: 0.05
+      ANCIENT_DEBRIS: 1.05
+    ITEMADDER: #대소문자 구분 필요
+      #test: 0.05
       
   EPIC:
     VANILLA:
@@ -39,6 +39,6 @@ OreGens: #총합 100
       DEEPSLATE_DIAMOND_ORE: 4.00
       EMERALD_ORE: 3.00
       DEEPSLATE_EMERALD_ORE: 3.00
-      ANCIENT_DEBRIS: 2.00
+      ANCIENT_DEBRIS: 2.05
     ITEMADDER:
-      TEST: 0.05
+      #test: 0.05
