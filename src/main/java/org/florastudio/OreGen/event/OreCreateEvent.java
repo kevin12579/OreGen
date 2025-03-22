@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.scheduler.BukkitTask;
 import org.florastudio.OreGen.OreGen;
 
@@ -79,6 +80,25 @@ public class OreCreateEvent implements Listener {
     }
 
     @EventHandler
+    public void onBreak(BlockBreakEvent e) {
+        Block brokenBlock = e.getBlock();
+        CustomBlock customBlock = CustomBlock.byAlreadyPlaced(brokenBlock);
+        if (customBlock != null) {
+            customBlock.remove();
+            brokenBlock.setType(Material.STONE);
+            Bukkit.getScheduler().runTaskLater(OreGen.getInstance(), () -> {
+                brokenBlock.setType(Material.AIR);
+            }, 1L);
+        }
+    }
+
+
+
+
+
+
+
+    @EventHandler
     public void onGen(BlockFromToEvent e) {
         Block b = e.getBlock();
         Block to = e.getToBlock();
@@ -104,13 +124,12 @@ public class OreCreateEvent implements Listener {
                 String selectedMaterial = selectCustomMaterial(regenBlocks.get(grade));
                 if (selectedMaterial == null) return;
 
-                if(CustomStack.isInRegistry(selectedMaterial)) {
+                if(CustomStack.getInstance(selectedMaterial) != null) {
                     CustomBlock customBlock = CustomBlock.getInstance(selectedMaterial);
                     if (customBlock != null) {
                         customBlock.place(to.getLocation());
-                    }
-                }
-                else {
+                    } 
+                } else {
                     Material material = Material.getMaterial(selectedMaterial);
                     if (material != null) {
                         to.setType(material);
