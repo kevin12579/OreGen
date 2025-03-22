@@ -1,0 +1,8 @@
+name: OrgGen
+version: '1.0-SNAPSHOT'
+author: hunseong
+main: org.florastudio.OreGen.OreGen
+api-version: '1.21'
+description: fence + water ore generator
+depend:
+  - ItemsAdder
