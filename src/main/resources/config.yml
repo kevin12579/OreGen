@@ -2,7 +2,25 @@
 TriggerBlocks: #아이템 에더 블럭도 트리거로 작동합니다. (test:test 대소문자 구분 필요 namespace도 같이 적어주세요)
   OAK_FENCE: NORMAL
   DARK_OAK_FENCE: EPIC
-  #test:test: NORMAL
+  #minerals_pack_v2:generator1: NORMAL
+  #(namespace):(name): grade
+  #아이템 에더 예시:
+  #info:
+  #namespace: minerals_pack_v2
+  #items:
+  #generator1:
+  #  display_name: generator1
+  #  resource:
+  #    material: PAPER
+  #    generate: false
+  #    model_path: gen1
+  #  specific_properties:
+  #    block:
+  #      placed_model:
+  #        type: REAL_NOTE
+  #        break_particles: BLOCK
+  #
+  #
 OreGens: #총합 100
   NORMAL:
     VANILLA:
