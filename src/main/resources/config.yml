@@ -1,7 +1,8 @@
-TriggerBlocks:
+#/oregen reload 로 리로드 가능합니다.
+TriggerBlocks: #아이템 에더 블럭도 트리거로 작동합니다. (test:test 대소문자 구분 필요 namespace도 같이 적어주세요)
   OAK_FENCE: NORMAL
   DARK_OAK_FENCE: EPIC
-
+  #test:test: NORMAL
 OreGens: #총합 100
   NORMAL:
     VANILLA:

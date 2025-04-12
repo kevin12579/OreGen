@@ -20,8 +20,11 @@ import dev.lone.itemsadder.api.CustomBlock;
 import dev.lone.itemsadder.api.CustomStack;
 import dev.lone.itemsadder.api.ItemsAdder;
 
+import java.math.BigDecimal;
+
 public class OreCreateEvent implements Listener {
-    private static final Map<Material, String> triggerBlocksList = new HashMap<>();
+    private static final Map<String, String> triggerBlocksList = new HashMap<>();
+
 
     public static Map<String, Map<String, Double>> regenBlocks = new HashMap<>();
 
@@ -29,15 +32,25 @@ public class OreCreateEvent implements Listener {
         ConfigurationSection triggerBlocks = OreGen.getInstance().getConfig().getConfigurationSection("TriggerBlocks");
         if (triggerBlocks != null) {
             for (String key : triggerBlocks.getKeys(false)) {
-                Material block = Material.getMaterial(key.toUpperCase());
-                if (block != null) {
-                    String tier = triggerBlocks.getString(key);
-                    triggerBlocksList.put(block, tier);
+                String tier = triggerBlocks.getString(key);
+
+                Material material = Material.matchMaterial(key.toUpperCase());
+                if (material != null) {
+                    triggerBlocksList.put(material.name(), tier);
+                    Bukkit.getLogger().info(tier + "등급 생성기: " + material.name() + " (바닐라)");
+                    continue;
+                }
+
+                if (CustomBlock.getInstance(key) != null) {
+                    triggerBlocksList.put(key, tier);
+                    Bukkit.getLogger().info(tier + "등급 생성기: " + key + " (아이템에더)");
                 } else {
-                    Bukkit.getLogger().warning("설정 오류: " + key + "는 존재하지 않는 블록입니다.");
+                    Bukkit.getLogger().warning("설정 오류: '" + key + "' 는 존재하지 않는 바닐라 또는 ItemsAdder 블록입니다.");
                 }
             }
         }
+
+
 
 
         ConfigurationSection oreGens = OreGen.getInstance().getConfig().getConfigurationSection("OreGens");
@@ -47,31 +60,34 @@ public class OreCreateEvent implements Listener {
                 Map<String, Double> genBlocks = new HashMap<>();
                 ConfigurationSection vanillaSection = oreGens.getConfigurationSection(tier + ".VANILLA");
                 ConfigurationSection itemAdderSection = oreGens.getConfigurationSection(tier + ".ITEMADDER");
-                Double totalchance = 0.00D;
+                BigDecimal totalChance = BigDecimal.ZERO;
+
                 if (vanillaSection != null) {
                     for (String blocks : vanillaSection.getKeys(false)) {
-                        Double chance = vanillaSection.getDouble(blocks);
-                        totalchance += chance;
-                        genBlocks.put(blocks, chance);
+                        BigDecimal chance = BigDecimal.valueOf(vanillaSection.getDouble(blocks));
+                        totalChance = totalChance.add(chance);
+                        genBlocks.put(blocks, chance.doubleValue());
                         Bukkit.getLogger().info(tier + "등록" + blocks + "확률: " + chance);
                     }
                 }
+
                 if (itemAdderSection != null) {
                     for (String blocks : itemAdderSection.getKeys(false)) {
                         if (CustomStack.getInstance(blocks) != null) {
-                            Double chance = itemAdderSection.getDouble(blocks);
-                            totalchance += chance;
-                            genBlocks.put(blocks, chance);
-                            Bukkit.getLogger().info(tier + "등록" + blocks + "확률: " +chance);
+                            BigDecimal chance = BigDecimal.valueOf(itemAdderSection.getDouble(blocks));
+                            totalChance = totalChance.add(chance);
+                            genBlocks.put(blocks, chance.doubleValue());
+                            Bukkit.getLogger().info(tier + "등록" + blocks + "확률: " + chance);
                         } else {
                             Bukkit.getLogger().warning(tier + "해당" + blocks + " 은 없는 id입니다. 대소문자 구분 해주세요.");
                         }
                     }
                 }
-                if (Math.abs(totalchance - 100.00) > 0.01) {
-                    Bukkit.getLogger().warning(tier + " 등급 OreGen 확률 총합이 100이 아닙니다. 현재 총합: " + totalchance);
-                    Bukkit.getLogger().warning("OreGen 플러그인 비활성화...");
-                    Bukkit.getPluginManager().disablePlugin(OreGen.getInstance());
+
+                // 총합이 100과 가까운지 확인 (오차 0.01 이하 허용)
+                if (totalChance.subtract(BigDecimal.valueOf(100.00)).abs().compareTo(BigDecimal.valueOf(0.01)) > 0) {
+                    Bukkit.getLogger().warning(tier + " 등급 OreGen 확률 총합이 100이 아닙니다. 현재 총합: " + totalChance);
+                    unregister();
                 }
                 regenBlocks.put(tier, genBlocks);
             }
@@ -116,9 +132,21 @@ public class OreCreateEvent implements Listener {
                 x = 1;
             if (e.getFace() == BlockFace.WEST)
                 x = -1;
+
             Block b2 = to.getLocation().clone().add(x, y, z).getBlock();
-            if (triggerBlocksList.containsKey(b2.getType())) {
-                String grade = triggerBlocksList.get(b2.getType());
+
+            String triggerKey = null;
+            CustomBlock cb = CustomBlock.byAlreadyPlaced(b2);
+            if (cb != null) {
+                triggerKey = cb.getNamespacedID();
+            } else {
+                // 2. 바닐라 블럭일 경우
+                triggerKey = b2.getType().name();
+            }
+
+
+            if (triggerBlocksList.containsKey(triggerKey)) {
+                String grade = triggerBlocksList.get(triggerKey);
                 if (!regenBlocks.containsKey(grade)) return;
                 e.setCancelled(true);
                 String selectedMaterial = selectCustomMaterial(regenBlocks.get(grade));
@@ -128,7 +156,7 @@ public class OreCreateEvent implements Listener {
                     CustomBlock customBlock = CustomBlock.getInstance(selectedMaterial);
                     if (customBlock != null) {
                         customBlock.place(to.getLocation());
-                    } 
+                    }
                 } else {
                     Material material = Material.getMaterial(selectedMaterial);
                     if (material != null) {
@@ -152,6 +180,17 @@ public class OreCreateEvent implements Listener {
         }
         double rand = random.nextDouble() * totalWeight;
         return map.ceilingEntry(rand).getValue();
+    }
+
+    public void unregister() {
+        BlockBreakEvent.getHandlerList().unregister(this);
+        BlockFromToEvent.getHandlerList().unregister(this);
+        Bukkit.getLogger().info("OreCreateEvent 리스너가 성공적으로 언레지스터되었습니다.");
+    }
+
+    public void register() {
+        Bukkit.getPluginManager().registerEvents(this, OreGen.getInstance());
+        Bukkit.getLogger().info("OreCreateEvent 리스너가 다시 등록되었습니다.");
     }
 }
 

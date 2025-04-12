@@ -6,3 +6,7 @@ api-version: '1.21'
 description: fence + water ore generator
 depend:
   - ItemsAdder
+commands:
+  oregen:
+    description: OreGen 설정을 리로드합니다.
+    usage: /<command>
