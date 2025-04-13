@@ -14,15 +14,15 @@ TriggerBlocks: #아이템 에더 블럭도 트리거로 작동합니다. (test:t
   #    material: PAPER
   #    generate: false
   #    model_path: gen1
-  #  specific_properties:
+  #  specific_properties: (무조건 블럭타입으로)
   #    block:
   #      placed_model:
   #        type: REAL_NOTE
   #        break_particles: BLOCK
   #
   #
-OreGens: #총합 100
-  NORMAL:
+OreGens: #총합 100 (계산 과정에서 오차가 존재할 수 있습니다. 값을 줄여보세요.)
+  NORMAL: #원하는 등급으로 설정하시면 됩니다. TIER1
     VANILLA:
       STONE: 24.95
       DEEPSLATE: 17.00
@@ -39,7 +39,7 @@ OreGens: #총합 100
       EMERALD_ORE: 1.00
       DEEPSLATE_EMERALD_ORE: 1.00
       ANCIENT_DEBRIS: 1.05
-    ITEMADDER: #대소문자 구분 필요
+    ITEMADDER: #대소문자 구분 필요 이건 namespace 필요 없음.
       #test: 0.05
       
   EPIC:
