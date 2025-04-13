@@ -99,12 +99,13 @@ public class OreCreateEvent implements Listener {
     public void onBreak(BlockBreakEvent e) {
         Block brokenBlock = e.getBlock();
         CustomBlock customBlock = CustomBlock.byAlreadyPlaced(brokenBlock);
+
+
         if (customBlock != null) {
             customBlock.remove();
             brokenBlock.setType(Material.STONE);
-            Bukkit.getScheduler().runTaskLater(OreGen.getInstance(), () -> {
-                brokenBlock.setType(Material.AIR);
-            }, 1L);
+            brokenBlock.setType(Material.AIR);
+
         }
     }
 
