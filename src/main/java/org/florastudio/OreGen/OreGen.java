@@ -38,7 +38,7 @@ public final class OreGen extends JavaPlugin {
         Objects.requireNonNull(getCommand("oregen")).setExecutor(new Command());
 
         oreCreateEvent = new OreCreateEvent();
-        getServer().getPluginManager().registerEvents(oreCreateEvent, this);
+        getOreCreateEvent().register();
 
         if (getServer().getPluginManager().isPluginEnabled(this)) {
             getLogger().info("OreGen 플러그인 로드완료. 제작자:hunseong 로드시간: " + (System.currentTimeMillis() - startTime) + "ms");

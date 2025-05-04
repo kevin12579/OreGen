@@ -27,7 +27,6 @@ import java.math.BigDecimal;
 public class OreCreateEvent implements Listener {
     private static final Map<String, String> triggerBlocksList = new HashMap<>();
 
-
     public static Map<String, Map<String, Double>> regenBlocks = new HashMap<>();
 
     public OreCreateEvent() {
@@ -105,6 +104,10 @@ public class OreCreateEvent implements Listener {
         CustomBlock cb = CustomBlock.byAlreadyPlaced(block);
         if (cb != null) {
             event.setCancelled(true);
+            block.setType(Material.STONE);
+            block.setType(Material.AIR);
+            block.getState().update(true, true);
+
             cb.playBreakSound();
             cb.playBreakParticles();
 
@@ -113,9 +116,7 @@ public class OreCreateEvent implements Listener {
                 block.getWorld().dropItemNaturally(block.getLocation(), item);
             }
             cb.remove();
-            block.setType(Material.STONE);
-            block.setType(Material.AIR);
-            block.getState().update(true, true);
+
         }
     }
 
@@ -196,12 +197,12 @@ public class OreCreateEvent implements Listener {
     public void unregister() {
         BlockBreakEvent.getHandlerList().unregister(this);
         BlockFromToEvent.getHandlerList().unregister(this);
-        Bukkit.getLogger().info("OreCreateEvent 리스너가 성공적으로 언레지스터되었습니다.");
+        Bukkit.getLogger().info("OreCreateEvent 리스너가 해제되었습니다.");
     }
 
     public void register() {
         Bukkit.getPluginManager().registerEvents(this, OreGen.getInstance());
-        Bukkit.getLogger().info("OreCreateEvent 리스너가 다시 등록되었습니다.");
+        Bukkit.getLogger().info("OreCreateEvent 리스너가 등록되었습니다.");
     }
 }
 
