@@ -8,11 +8,13 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import org.florastudio.OreGen.OreGen;
 
@@ -96,21 +98,26 @@ public class OreCreateEvent implements Listener {
     }
 
     @EventHandler
-    public void onBreak(BlockBreakEvent e) {
-        Block brokenBlock = e.getBlock();
-        CustomBlock customBlock = CustomBlock.byAlreadyPlaced(brokenBlock);
+    public void onBreak(BlockBreakEvent event) {
+        Block block = event.getBlock();
+        Player player = event.getPlayer();
 
+        CustomBlock cb = CustomBlock.byAlreadyPlaced(block);
+        if (cb != null) {
+            event.setCancelled(true);
+            cb.playBreakSound();
+            cb.playBreakParticles();
 
-        if (customBlock != null) {
-            customBlock.remove();
-            brokenBlock.setType(Material.STONE);
-            brokenBlock.setType(Material.AIR);
-
+            List<ItemStack> drops = cb.getLoot(player.getInventory().getItemInMainHand(), true);
+            for (ItemStack item : drops) {
+                block.getWorld().dropItemNaturally(block.getLocation(), item);
+            }
+            cb.remove();
+            block.setType(Material.STONE);
+            block.setType(Material.AIR);
+            block.getState().update(true, true);
         }
     }
-
-
-
 
 
 
@@ -119,6 +126,7 @@ public class OreCreateEvent implements Listener {
     public void onGen(BlockFromToEvent e) {
         Block b = e.getBlock();
         Block to = e.getToBlock();
+
         if (b.getType() == Material.WATER) {
             int x = 0, y = 0, z = 0;
             if (e.getFace() == BlockFace.DOWN)
@@ -157,11 +165,13 @@ public class OreCreateEvent implements Listener {
                     CustomBlock customBlock = CustomBlock.getInstance(selectedMaterial);
                     if (customBlock != null) {
                         customBlock.place(to.getLocation());
+                        to.getState().update(true, true);
                     }
                 } else {
                     Material material = Material.getMaterial(selectedMaterial);
                     if (material != null) {
                         to.setType(material);
+                        to.getState().update(true, true);
                     }
                 }
 
